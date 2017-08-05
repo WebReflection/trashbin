@@ -1,0 +1,19 @@
+{
+  "name": "trashbin",
+  "version": "0.0.0",
+  "description": "A ready to go file uploader for intranets.",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "start": "node index.js ./uploads"
+  },
+  "keywords": [
+    "upload",
+    "intranet"
+  ],
+  "author": "Andrea Giammarchi",
+  "license": "ISC",
+  "dependencies": {
+    "multiparty": "^4.1.3"
+  }
+}
