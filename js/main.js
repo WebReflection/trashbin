@@ -27,6 +27,7 @@ document.addEventListener(
         input.value = '';
         progress.max = 1;
         progress.value = 0;
+        input.disabled = false;
         upload.disabled = false;
         if (e.type === 'error') {
           alert('Something wrong: ' + (e.message || 'unknown'));
@@ -42,6 +43,7 @@ document.addEventListener(
         }
       };
       xhr.send(form);
+      input.disabled = true;
       upload.disabled = true;
       e.preventDefault();
     }, false);
