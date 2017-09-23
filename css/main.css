@@ -16,6 +16,10 @@ h2, li {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+h2 {
+  text-align: left;
+  direction: rtl;
+}
 form > * {
   margin-bottom: 8px;
 }
@@ -31,6 +35,7 @@ ul, li {
 }
 li {
   padding: 4px;
+  line-height: 1.4rem;
 }
 li:nth-child(2n) {
   background: #F0F0F0;

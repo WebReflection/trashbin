@@ -8,6 +8,9 @@ document.addEventListener(
     var list = document.querySelector('ul');
     progress.max = 1;
     progress.value = 0;
+    input.addEventListener('change', function (e) {
+      form.dispatchEvent(new CustomEvent('submit'));
+    });
     form.addEventListener('submit', function (e) {
       var files = [].slice.call(input.files, 0);
       if (files.length < 1) return e.preventDefault();
