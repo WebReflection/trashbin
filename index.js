@@ -38,6 +38,7 @@ fs.stat(uploadDir, function onStat(err, stats){
     Promise.all([
       loadContent(path.join(__dirname, 'view', 'index.html')),
       loadContent(path.join(__dirname, 'js', 'main.js')),
+      loadContent(path.join(__dirname, 'js', 'NoSleep.min.js')),
       loadContent(path.join(__dirname, 'css', 'main.css')),
       loadContent(path.join(__dirname, 'img', 'favicon.ico')),
       new Promise(function (res, rej) {
@@ -54,6 +55,7 @@ fs.stat(uploadDir, function onStat(err, stats){
           assets: {
             index: all.shift().toString(),
             '/js/main.js': all.shift(),
+            '/js/NoSleep.min.js': all.shift(),
             '/css/main.css': all.shift(),
             '/favicon.ico': all.shift()
           },
@@ -167,14 +169,15 @@ function upload(req, res, info) {
     var all = [];
     (files.upload || []).forEach(function (file) {
       all.push(new Promise(function (res, rej) {
+        var newName = (new Date).toISOString() + '-' + file.originalFilename;
         fs.rename(
           file.path,
-          path.join(path.dirname(file.path), file.originalFilename),
+          path.join(path.dirname(file.path), newName),
           function (err) {
             if (err) rej(file);
             else {
-              if (info.files.indexOf(file.originalFilename) < 0) {
-                info.files.unshift(file.originalFilename);
+              if (info.files.indexOf(newName) < 0) {
+                info.files.unshift(newName);
               }
               res(file);
             }

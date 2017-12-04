@@ -1,6 +1,7 @@
 document.addEventListener(
   'DOMContentLoaded',
   function () {
+    var noSleep = new NoSleep();
     var form = document.querySelector('form');
     var input = form.querySelector('input[type=file]');
     var upload = form.querySelector('input[type=submit]');
@@ -8,7 +9,10 @@ document.addEventListener(
     var list = document.querySelector('ul');
     progress.max = 1;
     progress.value = 0;
-    input.addEventListener('change', function (e) {
+    input.addEventListener('click', function () {
+      noSleep.enable();
+    });
+    input.addEventListener('change', function () {
       form.dispatchEvent(new CustomEvent('submit'));
     });
     form.addEventListener('submit', function (e) {
@@ -45,14 +49,17 @@ document.addEventListener(
           }
           if (e.type === 'error') {
             alert('Something wrong: ' + (e.message || 'unknown'));
+            noSleep.disable();
           } else {
-            if (Trashbin.files.indexOf(file.name) < 0) {
-              Trashbin.files.unshift(file.name);
+            var name = (new Date).toISOString() + '-' + file.name;
+            if (Trashbin.files.indexOf(name) < 0) {
+              Trashbin.files.unshift(name);
             }
             list.innerHTML = Trashbin.files.map(function (name) {
               return '<li><a href="/' + name + '" download>' + name + '</a></li>';
             }).join('');
             if (files.length) upload();
+            else noSleep.disable();
           }
         };
         xhr.send(form);
