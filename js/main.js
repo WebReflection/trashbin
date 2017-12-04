@@ -51,7 +51,7 @@ document.addEventListener(
             alert('Something wrong: ' + (e.message || 'unknown'));
             noSleep.disable();
           } else {
-            var name = (new Date).toISOString() + '-' + file.name;
+            var name = JSON.parse(e.target.getResponseHeader('x-filenames')).shift();
             if (Trashbin.files.indexOf(name) < 0) {
               Trashbin.files.unshift(name);
             }

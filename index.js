@@ -70,6 +70,19 @@ fs.stat(uploadDir, function onStat(err, stats){
   }
 });
 
+function getName(name) {
+  return /^\d{4}-\d{2}-\d{2}(?:T[0-9:.]+Z)?-/.test(name) ?
+    name :
+    (
+      (new Date).toISOString().replace(
+        /T(\d+):(\d+):(\d+)\.(\d+)Z/,
+        function ($0, H, M, S, ms) {
+          return '-'.concat(H, M, S, ms);
+        }
+      ) + '-' + name
+    );
+}
+
 function getIPv4() {
   var ni = require('os').networkInterfaces();
   return Object.keys(ni).reduce(function (out, key) {
@@ -169,7 +182,7 @@ function upload(req, res, info) {
     var all = [];
     (files.upload || []).forEach(function (file) {
       all.push(new Promise(function (res, rej) {
-        var newName = (new Date).toISOString() + '-' + file.originalFilename;
+        var newName = getName(file.originalFilename);
         fs.rename(
           file.path,
           path.join(path.dirname(file.path), newName),
@@ -179,7 +192,7 @@ function upload(req, res, info) {
               if (info.files.indexOf(newName) < 0) {
                 info.files.unshift(newName);
               }
-              res(file);
+              res(newName);
             }
           }
         );
@@ -196,8 +209,11 @@ function upload(req, res, info) {
         res.writeHead(500, {'Content-Type': 'text/html'});
         res.end(page + '✖ error ' + err);
       })
-      .then(function () {
-        res.writeHead(200, {'Content-Type': 'text/html'});
+      .then(function (names) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html',
+          'X-FileNames': JSON.stringify(names)
+        });
         res.end(page + '<meta http-equiv="refresh" content="1;URL=/">' + '✔ trashed');
       });
   });
