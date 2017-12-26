@@ -18,25 +18,32 @@ document.addEventListener(
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var files = [].slice.call(input.files, 0);
-      var index = 0;
-      var length = files.length;
-      if (length < 1) return;
+      if (files.length < 1) return;
       input.disabled = true;
       upload.disabled = true;
+      var loaded = 0;
+      var total = (progress.max = files.reduce(
+        function (total, file) {
+          total += file.size || 0;
+          return total;
+        },
+        0
+      ));
       (function upload() {
         var form = new FormData();
         var file = files.shift();
-        index++;
+        var adjust = !file.size;
         form.append(input.name, file);
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/upload', true);
         xhr.upload.onprogress = function (e) {
           if (e.lengthComputable) {
-            var max = length * e.total;
-            var current = index * e.total;
-            var value = current - e.total + e.loaded;
-            progress.max = max;
-            progress.value = value;
+            if (adjust) {
+              adjust = false;
+              total += e.loaded;
+              progress.max = total;
+            }
+            progress.value = loaded + e.loaded;
           }
         };
         xhr.onabort = xhr.onerror = xhr.onload = function (e) {
@@ -51,6 +58,7 @@ document.addEventListener(
             alert('Something wrong: ' + (e.message || 'unknown'));
             noSleep.disable();
           } else {
+            loaded = parseFloat(progress.value);
             var name = JSON.parse(e.target.getResponseHeader('x-filenames')).shift();
             if (Trashbin.files.indexOf(name) < 0) {
               Trashbin.files.unshift(name);
