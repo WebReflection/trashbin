@@ -1,4 +1,4 @@
-document.addEventListener(
+if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
   'DOMContentLoaded',
   function () {
     var noSleep = new NoSleep();
