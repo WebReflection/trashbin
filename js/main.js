@@ -1,4 +1,4 @@
-if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
+document.addEventListener(
   'DOMContentLoaded',
   function () {
     var noSleep = new NoSleep();
@@ -13,10 +13,13 @@ if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
       noSleep.enable();
     });
     input.addEventListener('change', function () {
-      form.dispatchEvent(new CustomEvent('submit'));
+      upload.click();
     });
     form.addEventListener('submit', function (e) {
+      if (sessionStorage.getItem('fucked') === 'up')
+        return;
       e.preventDefault();
+      e.returnValue = false;
       var files = [].slice.call(input.files, 0);
       if (files.length < 1) return;
       input.disabled = true;
@@ -29,7 +32,7 @@ if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
         },
         0
       ));
-      (function upload() {
+      (function send() {
         var form = new FormData();
         var file = files.shift();
         var adjust = !file.size;
@@ -47,17 +50,26 @@ if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
           }
         };
         xhr.onabort = xhr.onerror = xhr.onload = function (e) {
-          if (!files.length || e.type === 'error') {
-            input.value = '';
-            progress.max = 1;
-            progress.value = 0;
+          var aborted = e.type === 'abort';
+          var errored = e.type === 'error';
+          if (aborted || errored || !files.length) {
+            if (!aborted) {
+              input.value = '';
+              progress.max = 1;
+              progress.value = 0;
+            }
             input.disabled = false;
             upload.disabled = false;
           }
-          if (e.type === 'error') {
+          if (aborted) {
+            sessionStorage.setItem('fucked', 'up');
+            upload.click();
+          }
+          else if (errored) {
             alert('Something wrong: ' + (e.message || 'unknown'));
             noSleep.disable();
-          } else {
+          }
+          else {
             loaded = parseFloat(progress.value);
             var name = JSON.parse(e.target.getResponseHeader('x-filenames')).shift();
             if (Trashbin.files.indexOf(name) < 0) {
@@ -66,7 +78,7 @@ if (!/Firefox/.test(navigator.userAgent)) document.addEventListener(
             list.innerHTML = Trashbin.files.map(function (name) {
               return '<li><a href="/' + name + '" download>' + name + '</a></li>';
             }).join('');
-            if (files.length) upload();
+            if (files.length) send();
             else noSleep.disable();
           }
         };

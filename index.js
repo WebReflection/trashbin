@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-/*! (c) 2017 Andrea Giammarchi - @WebReflection
+/*! (c) 2017-2019 Andrea Giammarchi - @WebReflection
  *
  * ISC License
  *
